@@ -1,0 +1,10 @@
+services:
+  fast-tools-dev:
+    build: .
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    environment:
+      PYTHONPATH: /workspace
+      QT_QPA_PLATFORM: offscreen
+    command: python -m pytest

@@ -1,0 +1,1 @@
+"""Fast Tools application package."""

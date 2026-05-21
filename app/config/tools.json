@@ -1,0 +1,84 @@
+{
+  "tools": [
+    {
+      "name": "MySQL Server",
+      "package": "mysql-server",
+      "service": "mysql",
+      "category": "database",
+      "command": "mysql",
+      "description": "MySQL database server"
+    },
+    {
+      "name": "MySQL Client",
+      "package": "mysql-client",
+      "service": "",
+      "category": "database",
+      "command": "mysql",
+      "description": "MySQL command-line client"
+    },
+    {
+      "name": "Redis Server",
+      "package": "redis-server",
+      "service": "redis-server",
+      "category": "database",
+      "command": "redis-server",
+      "description": "Redis in-memory data store"
+    },
+    {
+      "name": "Nginx",
+      "package": "nginx",
+      "service": "nginx",
+      "category": "web",
+      "command": "nginx",
+      "description": "Nginx web server"
+    },
+    {
+      "name": "PostgreSQL",
+      "package": "postgresql",
+      "service": "postgresql",
+      "category": "database",
+      "command": "psql",
+      "description": "PostgreSQL database server"
+    },
+    {
+      "name": "Docker",
+      "package": "docker.io",
+      "service": "docker",
+      "category": "container",
+      "command": "docker",
+      "description": "Docker engine from Ubuntu repositories"
+    },
+    {
+      "name": "Git",
+      "package": "git",
+      "service": "",
+      "category": "cli",
+      "command": "git",
+      "description": "Git version control"
+    },
+    {
+      "name": "Curl",
+      "package": "curl",
+      "service": "",
+      "category": "cli",
+      "command": "curl",
+      "description": "Command-line URL transfer tool"
+    },
+    {
+      "name": "Wget",
+      "package": "wget",
+      "service": "",
+      "category": "cli",
+      "command": "wget",
+      "description": "Command-line file downloader"
+    },
+    {
+      "name": "Visual Studio Code",
+      "package": "code",
+      "service": "",
+      "category": "desktop",
+      "command": "code",
+      "description": "VS Code package, available only when the Microsoft apt repository is configured"
+    }
+  ]
+}
