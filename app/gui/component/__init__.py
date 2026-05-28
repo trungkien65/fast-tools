@@ -11,6 +11,7 @@ from app.gui.component.constants import (
     sorted_categories,
 )
 from app.gui.component.filter_bar import FilterBar
+from app.gui.component.footer_bar import FooterBar
 from app.gui.component.loading_mask import LoadingMask
 from app.gui.component.log_panel import LogPanel
 from app.gui.component.tool_card import ToolCard
@@ -24,6 +25,7 @@ __all__ = [
     "CARD_MIN_WIDTH",
     "CommandConfirmDialog",
     "FilterBar",
+    "FooterBar",
     "GROUP_LABELS",
     "GROUP_ORDER",
     "LoadingMask",

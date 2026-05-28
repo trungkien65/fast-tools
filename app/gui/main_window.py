@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import shlex
+import shutil
 import subprocess
+from pathlib import Path
 
 from PySide6.QtCore import QObject, QThread, Signal, Slot
 from PySide6.QtWidgets import (
@@ -20,6 +22,7 @@ from app.gui.component import (
     ActionBar,
     CommandConfirmDialog,
     FilterBar,
+    FooterBar,
     LoadingMask,
     LogPanel,
     ToolCardEntry,
@@ -110,6 +113,39 @@ class RefreshWorker(QObject):
         self.finished.emit()
 
 
+class UpdateWorker(QObject):
+    log = Signal(str, str)
+    finished = Signal(int)
+
+    def __init__(self, command: list[str]) -> None:
+        super().__init__()
+        self.command = command
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            process = subprocess.run(
+                self.command,
+                capture_output=True,
+                check=False,
+                text=True,
+            )
+        except FileNotFoundError as exc:
+            self.log.emit(f"Update command not found: {exc}", "error")
+            self.finished.emit(127)
+            return
+        except OSError as exc:
+            self.log.emit(f"Failed to start update: {exc}", "error")
+            self.finished.emit(1)
+            return
+
+        for line in process.stdout.splitlines():
+            self.log.emit(line, "info")
+        for line in process.stderr.splitlines():
+            self.log.emit(line, "error")
+        self.finished.emit(process.returncode)
+
+
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
@@ -127,6 +163,8 @@ class MainWindow(QMainWindow):
         self._uninstall_worker: UninstallWorker | None = None
         self._refresh_thread: QThread | None = None
         self._refresh_worker: RefreshWorker | None = None
+        self._update_thread: QThread | None = None
+        self._update_worker: UpdateWorker | None = None
 
         self.filter_bar = FilterBar(self.tools)
         self.filter_bar.filters_changed.connect(self.apply_filters)
@@ -137,6 +175,8 @@ class MainWindow(QMainWindow):
         self.action_bar.install_requested.connect(self.install_selected)
         self.action_bar.uninstall_requested.connect(self.uninstall_selected)
         self.log_panel = LogPanel()
+        self.footer_bar = FooterBar(f"{APP_NAME} v{self.app_version} ({self.app_channel})")
+        self.footer_bar.update_requested.connect(self.update_application)
 
         layout = QVBoxLayout()
         layout.addWidget(QLabel(f"{APP_NAME} v{self.app_version} ({self.app_channel})"))
@@ -144,6 +184,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.tree)
         layout.addWidget(self.action_bar)
         layout.addWidget(self.log_panel)
+        layout.addWidget(self.footer_bar)
 
         central = QWidget()
         central.setLayout(layout)
@@ -282,12 +323,14 @@ class MainWindow(QMainWindow):
             )
 
     @Slot(str)
+    @Slot(str, str)
     def append_log(self, message: str, level: str = "info") -> None:
         self.log_panel.append(message, level)
 
     def set_buttons_enabled(self, enabled: bool) -> None:
         self.action_bar.set_controls_enabled(enabled)
         self.filter_bar.set_controls_enabled(enabled)
+        self.footer_bar.set_controls_enabled(enabled)
 
     def show_loading(self, message: str) -> None:
         self.update_loading_mask_geometry()
@@ -359,6 +402,65 @@ class MainWindow(QMainWindow):
             "Fast Tools",
             "Could not open JetBrains Toolbox. Please install or launch it manually.",
         )
+
+    @Slot()
+    def update_application(self) -> None:
+        if self._update_thread and self._update_thread.isRunning():
+            return
+
+        command = self.resolve_update_command()
+        self.append_log(f"Updating Fast Tools with: {shlex.join(command)}")
+        self.set_buttons_enabled(False)
+        self._update_thread = QThread(self)
+        self._update_worker = UpdateWorker(command)
+        self._update_worker.moveToThread(self._update_thread)
+        self._update_thread.started.connect(self._update_worker.run)
+        self._update_worker.log.connect(self.append_log)
+        self._update_worker.finished.connect(self.update_finished)
+        self._update_worker.finished.connect(self._update_thread.quit)
+        self._update_worker.finished.connect(self._update_worker.deleteLater)
+        self._update_thread.finished.connect(self.clear_update_worker)
+        self._update_thread.finished.connect(self._update_thread.deleteLater)
+        self._update_thread.start()
+
+    @Slot(int)
+    def update_finished(self, returncode: int) -> None:
+        self.set_buttons_enabled(True)
+        if returncode == 0:
+            self.append_log("Fast Tools update complete.", "success")
+            QMessageBox.information(
+                self,
+                "Fast Tools",
+                "Fast Tools update completed. Restart the app to use the new version.",
+            )
+        else:
+            self.append_log(f"Fast Tools update failed with exit code {returncode}.", "error")
+            QMessageBox.warning(
+                self,
+                "Fast Tools",
+                "Fast Tools update failed. See the log for details.",
+            )
+
+    @Slot()
+    def clear_update_worker(self) -> None:
+        self._update_thread = None
+        self._update_worker = None
+
+    @staticmethod
+    def resolve_update_command() -> list[str]:
+        installed_command = shutil.which("fast-tools")
+        if installed_command:
+            return [installed_command, "--update"]
+
+        default_wrapper = Path("/usr/local/bin/fast-tools")
+        if default_wrapper.exists():
+            return [str(default_wrapper), "--update"]
+
+        repo_installer = Path(__file__).resolve().parents[2] / "install.sh"
+        if repo_installer.exists():
+            return ["bash", str(repo_installer), "--update"]
+
+        return ["fast-tools", "--update"]
 
     @Slot()
     def apply_filters(self) -> None:

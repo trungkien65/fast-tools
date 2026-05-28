@@ -506,8 +506,10 @@ install_release_payload() {
   local extract_dir="$1"
   log "Installing to ${INSTALL_DIR}"
   ${SUDO} rm -rf "${INSTALL_DIR}"
-  ${SUDO} mkdir -p "${INSTALL_DIR}"
+  ${SUDO} install -d -m 0755 -o root -g root "${INSTALL_DIR}"
   ${SUDO} cp -a "${extract_dir}/." "${INSTALL_DIR}/"
+  ${SUDO} chown -R root:root "${INSTALL_DIR}"
+  ${SUDO} chmod 0755 "${INSTALL_DIR}"
   ${SUDO} chmod +x "${INSTALL_DIR}/${APP_BIN_NAME}"
 }
 

@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +29,7 @@ jobs:
         run: |
           mkdir -p artifacts/linux-amd64 artifacts/common
           pyinstaller --noconfirm --onefile --name fast-tools app/main.py
+          dist/fast-tools --smoke-test
           cp dist/fast-tools artifacts/linux-amd64/fast-tools
           if [ -f icon.png ]; then cp icon.png artifacts/common/icon.png; fi
 
