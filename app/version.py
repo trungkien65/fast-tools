@@ -6,10 +6,11 @@ from pathlib import Path
 
 APP_NAME = "Fast Tools"
 DEFAULT_VERSION = "0.0.0"
+DEFAULT_CHANNEL = "stable"
 
 
 @lru_cache(maxsize=1)
-def get_app_version() -> str:
+def get_app_metadata() -> tuple[str, str]:
     version_file_candidates = [
         Path("/opt/fast-tools/version.json"),
         Path(__file__).resolve().parents[1] / "version.json",
@@ -22,9 +23,20 @@ def get_app_version() -> str:
         try:
             payload = json.loads(version_file.read_text(encoding="utf-8"))
             version = str(payload.get("version", "")).strip()
+            channel = str(payload.get("channel", DEFAULT_CHANNEL)).strip().lower()
+            if channel not in {"stable", "beta"}:
+                channel = DEFAULT_CHANNEL
             if version:
-                return version
+                return version, channel
         except (OSError, json.JSONDecodeError):
             continue
 
-    return DEFAULT_VERSION
+    return DEFAULT_VERSION, DEFAULT_CHANNEL
+
+
+def get_app_version() -> str:
+    return get_app_metadata()[0]
+
+
+def get_app_channel() -> str:
+    return get_app_metadata()[1]
