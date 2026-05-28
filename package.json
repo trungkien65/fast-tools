@@ -1,0 +1,8 @@
+{
+  "name": "fast-tools",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"Set BUILD_CMD or replace this with your real app build\""
+  }
+}

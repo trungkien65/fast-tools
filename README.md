@@ -1,8 +1,45 @@
 # Fast Tools
 
-Fast Tools is a Python 3.12 / PySide6 desktop app for Ubuntu that checks common developer packages and installs selected packages through `pkexec apt install -y`.
+Fast Tools is a Python / PySide6 desktop app for Ubuntu that checks common
+developer packages and installs selected packages through `pkexec apt install -y`.
 
 The GUI does not need to run as root. `pkexec` will ask for authorization only when installation is requested.
+
+## Requirements
+
+- Ubuntu or another Debian-based Linux distribution.
+- Python 3.12 for the Docker image, or Python 3.11+ for local development.
+- `apt`, `apt-cache`, and `dpkg-query` available on the host.
+- `pkexec` for graphical privilege prompts. If `pkexec` is unavailable, installs fall back to `sudo`.
+
+## Quick Start
+
+Run locally on Ubuntu:
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m app.main
+```
+
+You can also use the root wrapper:
+
+```bash
+python main.py
+```
+
+Run tests:
+
+```bash
+python -m pytest
+```
+
+Run a Qt startup smoke check without opening the full window:
+
+```bash
+QT_QPA_PLATFORM=offscreen python -m app.main --smoke-test
+```
 
 ## Tools
 
@@ -21,29 +58,19 @@ Each tool supports these fields:
 }
 ```
 
-Default packages:
+Default groups include:
 
-- `mysql-server`
-- `mysql-client`
-- `redis-server`
-- `nginx`
-- `postgresql`
-- `docker.io`
-- `git`
-- `curl`
-- `wget`
-- `code`
+- Tools: build tooling such as `build-essential`, `cmake`, compilers, `jq`.
+- Database: MySQL, PostgreSQL, SQLite, Redis, MongoDB client tools when available.
+- IDE: VS Code, Vim, Neovim.
+- Code: Git, Git LFS, Subversion.
+- Office: LibreOffice, Thunderbird, GIMP, Flameshot.
+- Network: curl, wget, SSH, DNS tools, net-tools, nmap, FileZilla.
+- Web, runtime, container, and system tools for common developer workflows.
 
 `code` requires the Microsoft apt repository. Without that repository, Fast Tools will show `Package not found`.
 
-## Local Run On Ubuntu
-
-```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python -m app.main
-```
+## Runtime Behavior
 
 Package status checks use:
 
@@ -75,6 +102,7 @@ Service checks use `systemctl is-active` and `systemctl is-enabled` for tools th
 - Command availability detection in the core checker.
 - Systemd service state detection for configured services.
 - Search and category filtering.
+- Componentized PySide6 GUI with separate tool card, filter, grouped list, action, and log widgets.
 - Sequential install queue for selected packages.
 - Log panel with automatic scrolling and status messages.
 
@@ -113,6 +141,66 @@ docker compose run --rm -e QT_QPA_PLATFORM=xcb -e DISPLAY=$DISPLAY fast-tools-de
 
 On Linux hosts, X11 forwarding usually also requires mounting the X11 socket and allowing local Docker clients to connect to your X server. This is intentionally not enabled by default because the app is meant to run locally on Ubuntu and Docker is mainly for tests and development commands.
 
+## Release and Install via install.sh
+
+Fast Tools supports script-based release, install, update, and uninstall without `.deb`.
+
+### Build release artifacts
+
+Prepare architecture binaries first:
+
+- `artifacts/linux-amd64/fast-tools`
+- `artifacts/linux-arm64/fast-tools`
+- Optional icon: `artifacts/common/icon.png`
+
+Generate release bundle:
+
+```bash
+./scripts/build-release.sh
+```
+
+Output:
+
+```text
+dist-release/
+├── install.sh
+├── uninstall.sh
+├── fast-tools-linux-amd64-v<version>.tar.gz
+├── fast-tools-linux-amd64-v<version>.tar.gz.sha256
+├── fast-tools-linux-arm64-v<version>.tar.gz
+└── fast-tools-linux-arm64-v<version>.tar.gz.sha256
+```
+
+### Publish
+
+Push a version tag and let GitHub Actions build and upload release assets to GitHub Releases.
+
+### User install / update / uninstall
+
+Install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/trungkien65/fast-tools/main/install.sh | bash
+```
+
+Check version:
+
+```bash
+fast-tools --version
+```
+
+Update:
+
+```bash
+fast-tools --update
+```
+
+Uninstall:
+
+```bash
+fast-tools --uninstall
+```
+
 ## Project Structure
 
 ```text
@@ -124,6 +212,7 @@ fast-tools/
 ├── app/
 │   ├── main.py
 │   ├── gui/
+│   │   ├── components.py
 │   │   └── main_window.py
 │   ├── core/
 │   │   ├── package_checker.py

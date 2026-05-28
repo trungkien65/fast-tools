@@ -1,6 +1,386 @@
 {
   "tools": [
     {
+      "name": "Git",
+      "package": "git",
+      "service": "",
+      "category": "code",
+      "command": "git",
+      "description": "Git version control"
+    },
+    {
+      "name": "Git LFS",
+      "package": "git-lfs",
+      "service": "",
+      "category": "code",
+      "command": "git-lfs",
+      "description": "Large file support for Git repositories"
+    },
+    {
+      "name": "Subversion",
+      "package": "subversion",
+      "service": "",
+      "category": "code",
+      "command": "svn",
+      "description": "Subversion version control client"
+    },
+    {
+      "name": "Build Essential",
+      "package": "build-essential",
+      "service": "",
+      "category": "tool",
+      "command": "make",
+      "description": "Compiler and build tooling meta-package"
+    },
+    {
+      "name": "CMake",
+      "package": "cmake",
+      "service": "",
+      "category": "tool",
+      "command": "cmake",
+      "description": "Cross-platform build system generator"
+    },
+    {
+      "name": "Make",
+      "package": "make",
+      "service": "",
+      "category": "tool",
+      "command": "make",
+      "description": "GNU Make build automation"
+    },
+    {
+      "name": "GCC",
+      "package": "gcc",
+      "service": "",
+      "category": "tool",
+      "command": "gcc",
+      "description": "GNU C compiler"
+    },
+    {
+      "name": "G++",
+      "package": "g++",
+      "service": "",
+      "category": "tool",
+      "command": "g++",
+      "description": "GNU C++ compiler"
+    },
+    {
+      "name": "Python pip",
+      "package": "python3-pip",
+      "service": "",
+      "category": "runtime",
+      "command": "pip3",
+      "description": "Python package installer"
+    },
+    {
+      "name": "Python venv",
+      "package": "python3-venv",
+      "service": "",
+      "category": "runtime",
+      "command": "python3",
+      "description": "Python virtual environment support"
+    },
+    {
+      "name": "Python 3",
+      "package": "python3",
+      "service": "",
+      "category": "language",
+      "command": "python3",
+      "description": "Python 3 interpreter"
+    },
+    {
+      "name": "Node.js",
+      "package": "nodejs",
+      "service": "",
+      "category": "language",
+      "command": "node",
+      "description": "Node.js JavaScript runtime from Ubuntu repositories"
+    },
+    {
+      "name": "npm",
+      "package": "npm",
+      "service": "",
+      "category": "runtime",
+      "command": "npm",
+      "description": "Node.js package manager"
+    },
+    {
+      "name": "pnpm",
+      "package": "pnpm",
+      "service": "",
+      "category": "runtime",
+      "command": "pnpm",
+      "install_method": "command",
+      "install_command": "corepack enable && corepack prepare pnpm@latest --activate",
+      "uninstall_command": "npm uninstall -g pnpm",
+      "description": "Fast JavaScript package manager managed through Corepack"
+    },
+    {
+      "name": "Bun",
+      "package": "bun",
+      "service": "",
+      "category": "runtime",
+      "command": "bun",
+      "install_method": "command",
+      "install_command": "curl -fsSL https://bun.sh/install | bash",
+      "uninstall_command": "rm -rf ~/.bun && rm -f ~/.local/bin/bun",
+      "description": "JavaScript runtime and package manager"
+    },
+    {
+      "name": "Go",
+      "package": "golang-go",
+      "service": "",
+      "category": "language",
+      "command": "go",
+      "description": "Go programming language toolchain"
+    },
+    {
+      "name": "Rust",
+      "package": "rustc",
+      "service": "",
+      "category": "language",
+      "command": "rustc",
+      "description": "Rust compiler from Ubuntu repositories"
+    },
+    {
+      "name": "Cargo",
+      "package": "cargo",
+      "service": "",
+      "category": "runtime",
+      "command": "cargo",
+      "description": "Rust package manager and build tool"
+    },
+    {
+      "name": "OpenJDK 17",
+      "package": "openjdk-17-jdk",
+      "service": "",
+      "category": "language",
+      "command": "javac",
+      "description": "Java development kit"
+    },
+    {
+      "name": "Maven",
+      "package": "maven",
+      "service": "",
+      "category": "runtime",
+      "command": "mvn",
+      "description": "Java project build and dependency tool"
+    },
+    {
+      "name": "Gradle",
+      "package": "gradle",
+      "service": "",
+      "category": "runtime",
+      "command": "gradle",
+      "description": "Build automation tool for JVM projects"
+    },
+    {
+      "name": "PHP CLI",
+      "package": "php-cli",
+      "service": "",
+      "category": "language",
+      "command": "php",
+      "description": "PHP command-line runtime"
+    },
+    {
+      "name": "Composer",
+      "package": "composer",
+      "service": "",
+      "category": "runtime",
+      "command": "composer",
+      "description": "PHP dependency manager"
+    },
+    {
+      "name": "Visual Studio Code",
+      "package": "code",
+      "service": "",
+      "category": "ide",
+      "command": "code",
+      "description": "VS Code package, available only when the Microsoft apt repository is configured"
+    },
+    {
+      "name": "Cursor",
+      "package": "cursor",
+      "service": "",
+      "category": "ide",
+      "command": "cursor",
+      "install_method": "deb_url",
+      "deb_url": "https://downloads.cursor.com/linux/deb/x64",
+      "uninstall_package": "cursor",
+      "description": "Cursor AI code editor installed from the official .deb URL"
+    },
+    {
+      "name": "Windsurf",
+      "package": "windsurf",
+      "service": "",
+      "category": "ide",
+      "command": "windsurf",
+      "install_method": "deb_url",
+      "deb_url": "https://windsurf-stable.codeium.com/linux_deb_x64.deb",
+      "uninstall_package": "windsurf",
+      "description": "Windsurf editor installed from the official .deb URL"
+    },
+    {
+      "name": "JetBrains Toolbox",
+      "package": "jetbrains-toolbox",
+      "service": "",
+      "category": "jetbrains",
+      "command": "jetbrains-toolbox",
+      "description": "JetBrains app manager for installing and updating JetBrains IDEs"
+    },
+    {
+      "name": "IntelliJ IDEA",
+      "package": "jetbrains-toolbox-idea",
+      "service": "",
+      "category": "jetbrains",
+      "command": "idea",
+      "description": "JetBrains IDE for JVM and polyglot development"
+    },
+    {
+      "name": "PyCharm",
+      "package": "jetbrains-toolbox-pycharm",
+      "service": "",
+      "category": "jetbrains",
+      "command": "pycharm",
+      "description": "JetBrains IDE for Python development"
+    },
+    {
+      "name": "WebStorm",
+      "package": "jetbrains-toolbox-webstorm",
+      "service": "",
+      "category": "jetbrains",
+      "command": "webstorm",
+      "description": "JetBrains IDE for JavaScript and TypeScript development"
+    },
+    {
+      "name": "PhpStorm",
+      "package": "jetbrains-toolbox-phpstorm",
+      "service": "",
+      "category": "jetbrains",
+      "command": "phpstorm",
+      "description": "JetBrains IDE for PHP development"
+    },
+    {
+      "name": "GoLand",
+      "package": "jetbrains-toolbox-goland",
+      "service": "",
+      "category": "jetbrains",
+      "command": "goland",
+      "description": "JetBrains IDE for Go development"
+    },
+    {
+      "name": "CLion",
+      "package": "jetbrains-toolbox-clion",
+      "service": "",
+      "category": "jetbrains",
+      "command": "clion",
+      "description": "JetBrains IDE for C and C++ development"
+    },
+    {
+      "name": "Rider",
+      "package": "jetbrains-toolbox-rider",
+      "service": "",
+      "category": "jetbrains",
+      "command": "rider",
+      "description": "JetBrains IDE for .NET development"
+    },
+    {
+      "name": "RubyMine",
+      "package": "jetbrains-toolbox-rubymine",
+      "service": "",
+      "category": "jetbrains",
+      "command": "rubymine",
+      "description": "JetBrains IDE for Ruby and Rails development"
+    },
+    {
+      "name": "DataGrip",
+      "package": "jetbrains-toolbox-datagrip",
+      "service": "",
+      "category": "jetbrains",
+      "command": "datagrip",
+      "description": "JetBrains database IDE"
+    },
+    {
+      "name": "DataSpell",
+      "package": "jetbrains-toolbox-dataspell",
+      "service": "",
+      "category": "jetbrains",
+      "command": "dataspell",
+      "description": "JetBrains IDE for data science"
+    },
+    {
+      "name": "RustRover",
+      "package": "jetbrains-toolbox-rustrover",
+      "service": "",
+      "category": "jetbrains",
+      "command": "rustrover",
+      "description": "JetBrains IDE for Rust development"
+    },
+    {
+      "name": "Aqua",
+      "package": "jetbrains-toolbox-aqua",
+      "service": "",
+      "category": "jetbrains",
+      "command": "aqua",
+      "description": "JetBrains IDE for test automation"
+    },
+    {
+      "name": "Android Studio",
+      "package": "jetbrains-toolbox-androidstudio",
+      "service": "",
+      "category": "jetbrains",
+      "command": "androidstudio",
+      "description": "Android app development IDE"
+    },
+    {
+      "name": "MPS",
+      "package": "jetbrains-toolbox-mps",
+      "service": "",
+      "category": "jetbrains",
+      "command": "mps",
+      "description": "JetBrains language workbench"
+    },
+    {
+      "name": "Writerside",
+      "package": "jetbrains-toolbox-writerside",
+      "service": "",
+      "category": "jetbrains",
+      "command": "writerside",
+      "description": "JetBrains documentation authoring tool"
+    },
+    {
+      "name": "JetBrains Fleet",
+      "package": "jetbrains-toolbox-fleet",
+      "service": "",
+      "category": "jetbrains",
+      "command": "fleet",
+      "description": "JetBrains lightweight code editor"
+    },
+    {
+      "name": "JetBrains Gateway",
+      "package": "jetbrains-toolbox-gateway",
+      "service": "",
+      "category": "jetbrains",
+      "command": "gateway",
+      "description": "JetBrains remote development launcher"
+    },
+    {
+      "name": "Vim",
+      "package": "vim",
+      "service": "",
+      "category": "ide",
+      "command": "vim",
+      "description": "Vim text editor"
+    },
+    {
+      "name": "Neovim",
+      "package": "neovim",
+      "service": "",
+      "category": "ide",
+      "command": "nvim",
+      "description": "Modern Vim-based text editor"
+    },
+    {
       "name": "MySQL Server",
       "package": "mysql-server",
       "service": "mysql",
@@ -17,12 +397,36 @@
       "description": "MySQL command-line client"
     },
     {
+      "name": "PostgreSQL",
+      "package": "postgresql",
+      "service": "postgresql",
+      "category": "database",
+      "command": "psql",
+      "description": "PostgreSQL database server"
+    },
+    {
+      "name": "SQLite",
+      "package": "sqlite3",
+      "service": "",
+      "category": "database",
+      "command": "sqlite3",
+      "description": "SQLite command-line database"
+    },
+    {
       "name": "Redis Server",
       "package": "redis-server",
       "service": "redis-server",
       "category": "database",
       "command": "redis-server",
       "description": "Redis in-memory data store"
+    },
+    {
+      "name": "MongoDB Tools",
+      "package": "mongodb-clients",
+      "service": "",
+      "category": "database",
+      "command": "mongo",
+      "description": "MongoDB client tools from Ubuntu repositories when available"
     },
     {
       "name": "Nginx",
@@ -33,12 +437,12 @@
       "description": "Nginx web server"
     },
     {
-      "name": "PostgreSQL",
-      "package": "postgresql",
-      "service": "postgresql",
-      "category": "database",
-      "command": "psql",
-      "description": "PostgreSQL database server"
+      "name": "Apache HTTP Server",
+      "package": "apache2",
+      "service": "apache2",
+      "category": "web",
+      "command": "apache2",
+      "description": "Apache HTTP server"
     },
     {
       "name": "Docker",
@@ -49,18 +453,18 @@
       "description": "Docker engine from Ubuntu repositories"
     },
     {
-      "name": "Git",
-      "package": "git",
+      "name": "Docker Compose",
+      "package": "docker-compose-plugin",
       "service": "",
-      "category": "cli",
-      "command": "git",
-      "description": "Git version control"
+      "category": "container",
+      "command": "docker",
+      "description": "Docker Compose v2 plugin"
     },
     {
       "name": "Curl",
       "package": "curl",
       "service": "",
-      "category": "cli",
+      "category": "network",
       "command": "curl",
       "description": "Command-line URL transfer tool"
     },
@@ -68,17 +472,465 @@
       "name": "Wget",
       "package": "wget",
       "service": "",
-      "category": "cli",
+      "category": "network",
       "command": "wget",
       "description": "Command-line file downloader"
     },
     {
-      "name": "Visual Studio Code",
-      "package": "code",
+      "name": "OpenSSH Client",
+      "package": "openssh-client",
       "service": "",
-      "category": "desktop",
-      "command": "code",
-      "description": "VS Code package, available only when the Microsoft apt repository is configured"
+      "category": "network",
+      "command": "ssh",
+      "description": "SSH client"
+    },
+    {
+      "name": "OpenSSH Server",
+      "package": "openssh-server",
+      "service": "ssh",
+      "category": "network",
+      "command": "sshd",
+      "description": "SSH server"
+    },
+    {
+      "name": "DNS Utils",
+      "package": "dnsutils",
+      "service": "",
+      "category": "network",
+      "command": "dig",
+      "description": "DNS query tools including dig and nslookup"
+    },
+    {
+      "name": "Net Tools",
+      "package": "net-tools",
+      "service": "",
+      "category": "network",
+      "command": "ifconfig",
+      "description": "Legacy networking tools including ifconfig and netstat"
+    },
+    {
+      "name": "Nmap",
+      "package": "nmap",
+      "service": "",
+      "category": "network",
+      "command": "nmap",
+      "description": "Network discovery and scanning tool"
+    },
+    {
+      "name": "FileZilla",
+      "package": "filezilla",
+      "service": "",
+      "category": "network",
+      "command": "filezilla",
+      "description": "FTP/SFTP desktop client"
+    },
+    {
+      "name": "LibreOffice",
+      "package": "libreoffice",
+      "service": "",
+      "category": "office",
+      "command": "libreoffice",
+      "description": "LibreOffice office suite"
+    },
+    {
+      "name": "LibreOffice Writer",
+      "package": "libreoffice-writer",
+      "service": "",
+      "category": "office",
+      "command": "lowriter",
+      "description": "Microsoft Word alternative"
+    },
+    {
+      "name": "LibreOffice Calc",
+      "package": "libreoffice-calc",
+      "service": "",
+      "category": "office",
+      "command": "localc",
+      "description": "Microsoft Excel alternative"
+    },
+    {
+      "name": "LibreOffice Impress",
+      "package": "libreoffice-impress",
+      "service": "",
+      "category": "office",
+      "command": "loimpress",
+      "description": "Microsoft PowerPoint alternative"
+    },
+    {
+      "name": "LibreOffice Draw",
+      "package": "libreoffice-draw",
+      "service": "",
+      "category": "office",
+      "command": "lodraw",
+      "description": "Microsoft Visio and Publisher alternative"
+    },
+    {
+      "name": "LibreOffice Base",
+      "package": "libreoffice-base",
+      "service": "",
+      "category": "office",
+      "command": "lobase",
+      "description": "Microsoft Access alternative"
+    },
+    {
+      "name": "LibreOffice Math",
+      "package": "libreoffice-math",
+      "service": "",
+      "category": "office",
+      "command": "lomath",
+      "description": "Office equation editor alternative"
+    },
+    {
+      "name": "Evolution",
+      "package": "evolution",
+      "service": "",
+      "category": "office",
+      "command": "evolution",
+      "description": "Microsoft Outlook alternative"
+    },
+    {
+      "name": "Zim",
+      "package": "zim",
+      "service": "",
+      "category": "office",
+      "command": "zim",
+      "description": "Microsoft OneNote alternative"
+    },
+    {
+      "name": "Okular",
+      "package": "okular",
+      "service": "",
+      "category": "office",
+      "command": "okular",
+      "description": "PDF reader and annotation tool"
+    },
+    {
+      "name": "Xournal++",
+      "package": "xournalpp",
+      "service": "",
+      "category": "office",
+      "command": "xournalpp",
+      "description": "Handwritten notes and PDF annotation"
+    },
+    {
+      "name": "Planner",
+      "package": "planner",
+      "service": "",
+      "category": "office",
+      "command": "planner",
+      "description": "Microsoft Project alternative"
+    },
+    {
+      "name": "Thunderbird",
+      "package": "thunderbird",
+      "service": "",
+      "category": "office",
+      "command": "thunderbird",
+      "description": "Email client"
+    },
+    {
+      "name": "GIMP",
+      "package": "gimp",
+      "service": "",
+      "category": "office",
+      "command": "gimp",
+      "description": "Image editor"
+    },
+    {
+      "name": "Flameshot",
+      "package": "flameshot",
+      "service": "",
+      "category": "office",
+      "command": "flameshot",
+      "description": "Screenshot and annotation tool"
+    },
+    {
+      "name": "htop",
+      "package": "htop",
+      "service": "",
+      "category": "system",
+      "command": "htop",
+      "description": "Interactive process viewer"
+    },
+    {
+      "name": "Tree",
+      "package": "tree",
+      "service": "",
+      "category": "system",
+      "command": "tree",
+      "description": "Directory tree listing tool"
+    },
+    {
+      "name": "jq",
+      "package": "jq",
+      "service": "",
+      "category": "tool",
+      "command": "jq",
+      "description": "Command-line JSON processor"
+    },
+    {
+      "name": "Unzip",
+      "package": "unzip",
+      "service": "",
+      "category": "system",
+      "command": "unzip",
+      "description": "Zip archive extraction tool"
+    },
+    {
+      "name": "MariaDB Server",
+      "package": "mariadb-server",
+      "service": "mariadb",
+      "category": "database",
+      "command": "mariadb",
+      "description": "MariaDB database server"
+    },
+    {
+      "name": "MariaDB Client",
+      "package": "mariadb-client",
+      "service": "",
+      "category": "database",
+      "command": "mariadb",
+      "description": "MariaDB command-line client"
+    },
+    {
+      "name": "PostgreSQL Client",
+      "package": "postgresql-client",
+      "service": "",
+      "category": "database",
+      "command": "psql",
+      "description": "PostgreSQL command-line client"
+    },
+    {
+      "name": "SQLite Browser",
+      "package": "sqlitebrowser",
+      "service": "",
+      "category": "database",
+      "command": "sqlitebrowser",
+      "description": "Desktop browser for SQLite databases"
+    },
+    {
+      "name": "Redis CLI Tools",
+      "package": "redis-tools",
+      "service": "",
+      "category": "database",
+      "command": "redis-cli",
+      "description": "Redis command-line tools"
+    },
+    {
+      "name": "Memcached",
+      "package": "memcached",
+      "service": "memcached",
+      "category": "database",
+      "command": "memcached",
+      "description": "Memcached distributed memory cache"
+    },
+    {
+      "name": "Adminer",
+      "package": "adminer",
+      "service": "",
+      "category": "database",
+      "command": "",
+      "description": "Web-based database administration tool"
+    },
+    {
+      "name": "Python Headers",
+      "package": "python3-dev",
+      "service": "",
+      "category": "language",
+      "command": "python3-config",
+      "description": "Python development headers for native extensions"
+    },
+    {
+      "name": "TypeScript",
+      "package": "node-typescript",
+      "service": "",
+      "category": "language",
+      "command": "tsc",
+      "description": "TypeScript compiler from Ubuntu repositories"
+    },
+    {
+      "name": "Ruby",
+      "package": "ruby-full",
+      "service": "",
+      "category": "language",
+      "command": "ruby",
+      "description": "Ruby language and standard tooling"
+    },
+    {
+      "name": "Perl",
+      "package": "perl",
+      "service": "",
+      "category": "language",
+      "command": "perl",
+      "description": "Perl programming language"
+    },
+    {
+      "name": "Lua 5.4",
+      "package": "lua5.4",
+      "service": "",
+      "category": "language",
+      "command": "lua5.4",
+      "description": "Lua 5.4 interpreter"
+    },
+    {
+      "name": "R",
+      "package": "r-base",
+      "service": "",
+      "category": "language",
+      "command": "R",
+      "description": "R statistical computing environment"
+    },
+    {
+      "name": "Elixir",
+      "package": "elixir",
+      "service": "",
+      "category": "language",
+      "command": "elixir",
+      "description": "Elixir language for Erlang VM"
+    },
+    {
+      "name": "Erlang",
+      "package": "erlang",
+      "service": "",
+      "category": "language",
+      "command": "erl",
+      "description": "Erlang programming language and runtime"
+    },
+    {
+      "name": "Scala",
+      "package": "scala",
+      "service": "",
+      "category": "language",
+      "command": "scala",
+      "description": "Scala programming language"
+    },
+    {
+      "name": "Clojure",
+      "package": "clojure",
+      "service": "",
+      "category": "language",
+      "command": "clojure",
+      "description": "Clojure programming language"
+    },
+    {
+      "name": "Zsh / Oh My Zsh Base",
+      "package": "zsh",
+      "service": "",
+      "category": "recommend",
+      "command": "zsh",
+      "description": "Zsh shell; Oh My Zsh itself is installed with its upstream script, not apt"
+    },
+    {
+      "name": "Powerline Fonts",
+      "package": "fonts-powerline",
+      "service": "",
+      "category": "recommend",
+      "command": "",
+      "description": "Powerline-compatible fonts for terminal prompts"
+    },
+    {
+      "name": "fzf",
+      "package": "fzf",
+      "service": "",
+      "category": "recommend",
+      "command": "fzf",
+      "description": "Command-line fuzzy finder"
+    },
+    {
+      "name": "ripgrep",
+      "package": "ripgrep",
+      "service": "",
+      "category": "recommend",
+      "command": "rg",
+      "description": "Fast recursive text search"
+    },
+    {
+      "name": "bat",
+      "package": "bat",
+      "service": "",
+      "category": "recommend",
+      "command": "batcat",
+      "description": "Cat clone with syntax highlighting"
+    },
+    {
+      "name": "fd",
+      "package": "fd-find",
+      "service": "",
+      "category": "recommend",
+      "command": "fdfind",
+      "description": "Fast and user-friendly file finder"
+    },
+    {
+      "name": "tmux",
+      "package": "tmux",
+      "service": "",
+      "category": "recommend",
+      "command": "tmux",
+      "description": "Terminal multiplexer"
+    },
+    {
+      "name": "direnv",
+      "package": "direnv",
+      "service": "",
+      "category": "recommend",
+      "command": "direnv",
+      "description": "Per-directory shell environment loader"
+    },
+    {
+      "name": "ShellCheck",
+      "package": "shellcheck",
+      "service": "",
+      "category": "recommend",
+      "command": "shellcheck",
+      "description": "Static analysis for shell scripts"
+    },
+    {
+      "name": "HTTPie",
+      "package": "httpie",
+      "service": "",
+      "category": "recommend",
+      "command": "http",
+      "description": "Human-friendly HTTP client"
+    },
+    {
+      "name": "pre-commit",
+      "package": "pre-commit",
+      "service": "",
+      "category": "recommend",
+      "command": "pre-commit",
+      "description": "Git hook framework"
+    },
+    {
+      "name": "GitHub CLI",
+      "package": "gh",
+      "service": "",
+      "category": "recommend",
+      "command": "gh",
+      "description": "GitHub command-line interface from Ubuntu repositories"
+    },
+    {
+      "name": "tig",
+      "package": "tig",
+      "service": "",
+      "category": "recommend",
+      "command": "tig",
+      "description": "Text-mode interface for Git history"
+    },
+    {
+      "name": "exa",
+      "package": "exa",
+      "service": "",
+      "category": "recommend",
+      "command": "exa",
+      "description": "Modern replacement for ls"
+    },
+    {
+      "name": "Neofetch",
+      "package": "neofetch",
+      "service": "",
+      "category": "recommend",
+      "command": "neofetch",
+      "description": "System information display for terminals"
     }
   ]
 }

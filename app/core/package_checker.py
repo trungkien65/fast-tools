@@ -5,10 +5,14 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from enum import StrEnum
+from pathlib import Path
 from typing import Sequence
 
 
 PACKAGE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+.-]*$")
+JETBRAINS_TOOLBOX_PACKAGE = "jetbrains-toolbox"
+JETBRAINS_TOOLBOX_PACKAGE_PREFIX = "jetbrains-toolbox-"
+JETBRAINS_TOOLBOX_PATH = Path.home() / ".local/share/JetBrains/Toolbox"
 
 
 class PackageStatus(StrEnum):
@@ -44,6 +48,17 @@ class PackageChecker:
 
     def check_package(self, package_name: str, command_name: str = "") -> PackageInfo:
         self._validate_package_name(package_name)
+        if self._is_jetbrains_toolbox_package(package_name):
+            installed = self._jetbrains_toolbox_package_installed(package_name)
+            return PackageInfo(
+                package=package_name,
+                installed=installed,
+                exists=installed,
+                version="JetBrains Toolbox" if installed else "",
+                command_available=None,
+                status=PackageStatus.INSTALLED if installed else PackageStatus.PACKAGE_NOT_FOUND,
+            )
+
         installed, version = self.installed_version(package_name)
         exists = True if installed else self.package_exists(package_name)
         command_available = self.command_exists(command_name) if command_name else None
@@ -66,6 +81,9 @@ class PackageChecker:
 
     def is_installed(self, package_name: str) -> bool:
         self._validate_package_name(package_name)
+        if self._is_jetbrains_toolbox_package(package_name):
+            return self._jetbrains_toolbox_package_installed(package_name)
+
         result = self._run(
             ["dpkg-query", "-W", "-f=${Status}", package_name],
             timeout_seconds=self.timeout_seconds,
@@ -74,6 +92,10 @@ class PackageChecker:
 
     def installed_version(self, package_name: str) -> tuple[bool, str]:
         self._validate_package_name(package_name)
+        if self._is_jetbrains_toolbox_package(package_name):
+            installed = self._jetbrains_toolbox_package_installed(package_name)
+            return installed, "JetBrains Toolbox" if installed else ""
+
         result = self._run(
             ["dpkg-query", "-W", "-f=${Status}\t${Version}", package_name],
             timeout_seconds=self.timeout_seconds,
@@ -87,6 +109,9 @@ class PackageChecker:
 
     def package_exists(self, package_name: str) -> bool:
         self._validate_package_name(package_name)
+        if self._is_jetbrains_toolbox_package(package_name):
+            return self._jetbrains_toolbox_package_installed(package_name)
+
         result = self._run(
             ["apt-cache", "show", package_name],
             timeout_seconds=self.timeout_seconds,
@@ -103,6 +128,29 @@ class PackageChecker:
     def _validate_package_name(package_name: str) -> None:
         if not PACKAGE_NAME_PATTERN.fullmatch(package_name):
             raise ValueError(f"Invalid package name: {package_name!r}")
+
+    @staticmethod
+    def _is_jetbrains_toolbox_package(package_name: str) -> bool:
+        return (
+            package_name == JETBRAINS_TOOLBOX_PACKAGE
+            or package_name.startswith(JETBRAINS_TOOLBOX_PACKAGE_PREFIX)
+        )
+
+    @staticmethod
+    def _jetbrains_toolbox_package_installed(package_name: str) -> bool:
+        if package_name == JETBRAINS_TOOLBOX_PACKAGE:
+            return (
+                JETBRAINS_TOOLBOX_PATH.exists()
+                or Path.home().joinpath(".local/share/applications/jetbrains-toolbox.desktop").exists()
+                or shutil.which("jetbrains-toolbox") is not None
+            )
+
+        slug = package_name.removeprefix(JETBRAINS_TOOLBOX_PACKAGE_PREFIX)
+        app_path = JETBRAINS_TOOLBOX_PATH / "apps" / slug
+        return (
+            app_path.joinpath("bin", slug).exists()
+            or app_path.joinpath("bin", f"{slug}.sh").exists()
+        )
 
     @staticmethod
     def _run(command: Sequence[str], timeout_seconds: int) -> CommandResult:

@@ -6,7 +6,7 @@ import pytest
 from app.core.installer import PackageInstaller
 from app.core.package_checker import CommandResult, PackageChecker, PackageStatus
 from app.core.service_manager import ServiceManager
-from app.core.tools_config import load_tools
+from app.core.tools_config import Tool, load_jetbrains_toolbox_tools, load_tools
 
 
 class FakeChecker(PackageChecker):
@@ -54,6 +54,9 @@ def test_load_tools_reads_extended_metadata(tmp_path):
                         "service": "redis-server",
                         "category": "database",
                         "command": "redis-server",
+                        "install_method": "command",
+                        "install_command": "echo install",
+                        "uninstall_command": "echo uninstall",
                     }
                 ]
             }
@@ -66,6 +69,23 @@ def test_load_tools_reads_extended_metadata(tmp_path):
     assert tool.service == "redis-server"
     assert tool.category == "database"
     assert tool.command == "redis-server"
+    assert tool.install_method == "command"
+    assert tool.install_command == "echo install"
+    assert tool.uninstall_command == "echo uninstall"
+
+
+def test_load_jetbrains_toolbox_tools_reads_local_apps(tmp_path):
+    app_bin = tmp_path / "pycharm" / "bin"
+    app_bin.mkdir(parents=True)
+    launcher = app_bin / "pycharm"
+    launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+
+    tools = load_jetbrains_toolbox_tools(tmp_path)
+
+    assert len(tools) == 1
+    assert tools[0].name == "PyCharm"
+    assert tools[0].package == "jetbrains-toolbox-pycharm"
+    assert tools[0].category == "jetbrains"
 
 
 def test_check_status_distinguishes_installed_available_and_missing():
@@ -111,6 +131,55 @@ def test_installer_uses_argument_array(monkeypatch):
 
     assert result.success is True
     assert calls[0][0] == ["pkexec", "apt", "install", "-y", "git"]
+    assert calls[0][1]["shell"] is not True if "shell" in calls[0][1] else True
+
+
+def test_installer_supports_command_method(monkeypatch):
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append((command, kwargs))
+        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    installer = PackageInstaller(checker=FakeChecker())
+    tool = Tool(
+        name="pnpm",
+        package="pnpm",
+        install_method="command",
+        install_command="corepack enable pnpm",
+        uninstall_command="npm uninstall -g pnpm",
+    )
+
+    result = installer.install_tool(tool)
+
+    assert result.success is True
+    assert calls[0][0] == ["bash", "-lc", "corepack enable pnpm"]
+
+
+def test_uninstaller_rejects_not_installed_package():
+    installer = PackageInstaller(checker=FakeChecker(installed=set()))
+
+    result = installer.uninstall("missing")
+
+    assert result.success is False
+    assert result.message == "Package is not installed: missing"
+
+
+def test_uninstaller_uses_argument_array(monkeypatch):
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append((command, kwargs))
+        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    installer = PackageInstaller(checker=FakeChecker(installed={"git"}))
+
+    result = installer.uninstall("git")
+
+    assert result.success is True
+    assert calls[0][0] == ["pkexec", "apt", "remove", "-y", "git"]
     assert calls[0][1]["shell"] is not True if "shell" in calls[0][1] else True
 
 

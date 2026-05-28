@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+        if: ${{ hashFiles('package.json') != '' }}
+
+      - name: Install Node dependencies
+        run: npm ci
+        if: ${{ hashFiles('package-lock.json') != '' }}
+
+      - name: Build release artifacts
+        run: ./scripts/build-release.sh
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          files: |
+            dist-release/*.tar.gz
+            dist-release/*.tar.gz.sha256

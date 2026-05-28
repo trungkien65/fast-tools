@@ -25,6 +25,12 @@
       "skillPath": "skills/docker-expert/SKILL.md",
       "computedHash": "7be30b1c18b91628dcd8437a89e7e20acce76bae4349533e4ebdeb376a660bcb"
     },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "d31e234f0c90694a670222cdd1dafa853e051d7066beda389f1097c22dadd461"
+    },
     "python-testing-patterns": {
       "source": "wshobson/agents",
       "sourceType": "github",
