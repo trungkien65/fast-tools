@@ -10,6 +10,7 @@ AMD64_BIN="${AMD64_BIN:-${ROOT_DIR}/artifacts/linux-amd64/fast-tools}"
 ARM64_BIN="${ARM64_BIN:-${ROOT_DIR}/artifacts/linux-arm64/fast-tools}"
 ICON_PATH="${ICON_PATH:-${ROOT_DIR}/artifacts/common/icon.png}"
 BUILD_CMD="${BUILD_CMD:-}"
+TARGET_ARCHES="${TARGET_ARCHES:-amd64,arm64}"
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -67,6 +68,15 @@ pack_arch() {
   sha256sum "${out}" | awk '{print $1}' > "${out}.sha256"
 }
 
+arch_enabled() {
+  local target="$1"
+  python3 - "${TARGET_ARCHES}" "${target}" <<'PY'
+import sys
+targets = {x.strip() for x in sys.argv[1].split(",") if x.strip()}
+print("yes" if sys.argv[2] in targets else "no")
+PY
+}
+
 main() {
   need_cmd python3
   need_cmd tar
@@ -100,8 +110,12 @@ EOF
   cp -f "${ROOT_DIR}/uninstall.sh" "${DIST_DIR}/uninstall.sh"
   chmod +x "${DIST_DIR}/install.sh" "${DIST_DIR}/uninstall.sh"
 
-  pack_arch "amd64" "${AMD64_BIN}" "${version}"
-  pack_arch "arm64" "${ARM64_BIN}" "${version}"
+  if [[ "$(arch_enabled "amd64")" == "yes" ]]; then
+    pack_arch "amd64" "${AMD64_BIN}" "${version}"
+  fi
+  if [[ "$(arch_enabled "arm64")" == "yes" ]]; then
+    pack_arch "arm64" "${ARM64_BIN}" "${version}"
+  fi
 
   echo "Release artifacts generated at ${DIST_DIR}"
 }
