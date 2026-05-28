@@ -1,14 +1,18 @@
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QDialog,
     QDialogButtonBox,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
-    QPushButton,
     QTextEdit,
+    QStyle,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -24,6 +28,7 @@ class CommandConfirmDialog(QDialog):
     ) -> None:
         super().__init__(parent)
         self.command = command
+        self.display_command = command
         self.setWindowTitle("Fast Tools")
         self.setMinimumWidth(560)
 
@@ -42,15 +47,51 @@ class CommandConfirmDialog(QDialog):
         self.command_block.setFixedHeight(76)
         self.command_block.setObjectName("commandBlock")
 
-        self.copy_button = QPushButton("Copy")
+        self.one_line_checkbox = QCheckBox("One line")
+        self.one_line_checkbox.setObjectName("commandOption")
+        self.one_line_checkbox.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.one_line_checkbox.toggled.connect(self.update_command_block)
+
+        self.copy_button = QToolButton()
+        self.copy_button.setObjectName("commandCopyButton")
         self.copy_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.copy_button.setToolTip("Copy command")
+        self.copy_button.setAccessibleName("Copy command")
+        self.copy_button.setIcon(
+            QIcon.fromTheme(
+                "edit-copy",
+                self.style().standardIcon(QStyle.StandardPixmap.SP_FileIcon),
+            )
+        )
+        self.copy_button.setIconSize(QSize(12, 12))
         self.copy_button.clicked.connect(self.copy_command)
 
         command_header = QHBoxLayout()
         command_header.setContentsMargins(0, 0, 0, 0)
         command_header.addWidget(command_label)
         command_header.addStretch()
-        command_header.addWidget(self.copy_button)
+
+        command_container = QWidget()
+        command_container.setObjectName("commandContainer")
+        command_tools = QWidget()
+        command_tools.setObjectName("commandTools")
+        command_tools_layout = QHBoxLayout()
+        command_tools_layout.setContentsMargins(0, 0, 0, 0)
+        command_tools_layout.setSpacing(6)
+        command_tools_layout.addWidget(self.one_line_checkbox)
+        command_tools_layout.addWidget(self.copy_button)
+        command_tools.setLayout(command_tools_layout)
+
+        command_layout = QGridLayout()
+        command_layout.setContentsMargins(0, 0, 0, 0)
+        command_layout.addWidget(self.command_block, 0, 0)
+        command_layout.addWidget(
+            command_tools,
+            0,
+            0,
+            Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight,
+        )
+        command_container.setLayout(command_layout)
 
         self.buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Cancel,
@@ -71,7 +112,7 @@ class CommandConfirmDialog(QDialog):
         layout.addWidget(title)
         layout.addWidget(items)
         layout.addLayout(command_header)
-        layout.addWidget(self.command_block)
+        layout.addWidget(command_container)
         layout.addWidget(self.buttons)
         self.setLayout(layout)
 
@@ -90,12 +131,50 @@ class CommandConfirmDialog(QDialog):
                 border-radius: 6px;
                 color: #f9fafb;
                 font-family: monospace;
-                padding: 8px;
+                padding: 32px 8px 8px 8px;
+            }
+            QWidget#commandTools {
+                background: rgba(31, 41, 55, 225);
+                border: 1px solid #4b5563;
+                border-radius: 4px;
+                margin: 6px;
+                padding: 2px;
+            }
+            QCheckBox#commandOption {
+                color: #f9fafb;
+                font-size: 11px;
+                spacing: 4px;
+            }
+            QToolButton#commandCopyButton {
+                background: transparent;
+                border: none;
+                padding: 2px;
+            }
+            QToolButton#commandCopyButton:hover {
+                background: #374151;
             }
             """
         )
 
+    def update_command_block(self) -> None:
+        self.display_command = self.formatted_command()
+        self.command_block.setPlainText(self.display_command)
+        self.copy_button.setToolTip("Copy command")
+        self.copy_button.setAccessibleName("Copy command")
+
+    def formatted_command(self) -> str:
+        if not self.one_line_checkbox.isChecked():
+            return self.command
+
+        commands = [
+            line.strip()
+            for line in self.command.splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        ]
+        return " && ".join(commands)
+
     def copy_command(self) -> None:
         clipboard = QApplication.clipboard()
-        clipboard.setText(self.command)
-        self.copy_button.setText("Copied")
+        clipboard.setText(self.display_command)
+        self.copy_button.setToolTip("Copied")
+        self.copy_button.setAccessibleName("Copied")

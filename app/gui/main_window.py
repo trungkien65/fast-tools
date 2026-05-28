@@ -170,6 +170,7 @@ class MainWindow(QMainWindow):
         self.filter_bar.filters_changed.connect(self.apply_filters)
         self.tree = ToolsTree(self.tools)
         self.tree.toolbox_requested.connect(self.open_jetbrains_toolbox)
+        self.tree.toolbox_install_requested.connect(self.install_jetbrains_toolbox)
         self.action_bar = ActionBar()
         self.action_bar.refresh_requested.connect(self.refresh_statuses)
         self.action_bar.install_requested.connect(self.install_selected)
@@ -190,6 +191,7 @@ class MainWindow(QMainWindow):
         central.setLayout(layout)
         self.setCentralWidget(central)
         self.loading_mask = LoadingMask(central)
+        self.refresh_jetbrains_toolbox_action()
 
         if auto_refresh:
             self.refresh_statuses()
@@ -239,6 +241,7 @@ class MainWindow(QMainWindow):
     def refresh_finished(self) -> None:
         self.set_buttons_enabled(True)
         self.apply_filters()
+        self.refresh_jetbrains_toolbox_action()
         self.hide_loading()
         self.append_log("Status refresh complete.", "success")
 
@@ -402,6 +405,29 @@ class MainWindow(QMainWindow):
             self,
             "Fast Tools",
             "Could not open JetBrains Toolbox. Please install or launch it manually.",
+        )
+
+    @Slot()
+    def install_jetbrains_toolbox(self) -> None:
+        install_url = "https://www.jetbrains.com/toolbox-app/"
+        try:
+            subprocess.Popen(["xdg-open", install_url])
+            self.append_log("Opening JetBrains Toolbox download page ...")
+            return
+        except FileNotFoundError:
+            pass
+        except OSError as exc:
+            self.append_log(f"Failed to open JetBrains Toolbox download page: {exc}")
+
+        QMessageBox.information(
+            self,
+            "Fast Tools",
+            f"Open this URL to install JetBrains Toolbox:\n{install_url}",
+        )
+
+    def refresh_jetbrains_toolbox_action(self) -> None:
+        self.tree.set_jetbrains_toolbox_installed(
+            self.checker.is_installed("jetbrains-toolbox")
         )
 
     @Slot()

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from PySide6.QtCore import QTimer, Qt, Signal
 from PySide6.QtWidgets import (
+    QCheckBox,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -23,6 +24,7 @@ from app.gui.component.tool_group import ToolGroup
 class ToolsTree(QWidget):
     JETBRAINS_TOOLTIP = "Install or remove this IDE from JetBrains Toolbox"
     toolbox_requested = Signal()
+    toolbox_install_requested = Signal()
 
     def __init__(self, tools: list[Tool]) -> None:
         super().__init__()
@@ -74,11 +76,25 @@ class ToolsTree(QWidget):
             group_label_widget.setObjectName("toolGroupLabel")
             group_header.addWidget(group_label_widget)
 
+            select_all_checkbox = QCheckBox("Check all")
+            select_all_checkbox.setObjectName("groupSelectAll")
+            select_all_checkbox.setCursor(Qt.CursorShape.PointingHandCursor)
+            select_all_checkbox.setTristate(True)
+            select_all_checkbox.clicked.connect(
+                lambda _checked, group_category=category: self.toggle_group_checked(group_category)
+            )
+            group_header.addWidget(
+                select_all_checkbox,
+                0,
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+            )
+
+            toolbox_button = None
             if category == "jetbrains":
-                open_toolbox_button = QPushButton("Open Toolbox")
-                open_toolbox_button.setCursor(Qt.CursorShape.PointingHandCursor)
-                open_toolbox_button.clicked.connect(self.toolbox_requested.emit)
-                group_header.addWidget(open_toolbox_button, 0, Qt.AlignmentFlag.AlignLeft)
+                toolbox_button = QPushButton("Install Toolbox")
+                toolbox_button.setCursor(Qt.CursorShape.PointingHandCursor)
+                toolbox_button.clicked.connect(self.toolbox_install_requested.emit)
+                group_header.addWidget(toolbox_button, 0, Qt.AlignmentFlag.AlignLeft)
 
             group_header.addStretch()
             group_layout.addLayout(group_header)
@@ -89,7 +105,12 @@ class ToolsTree(QWidget):
             grid.setVerticalSpacing(8)
             group_layout.addLayout(grid)
 
-            tool_group = ToolGroup(widget=group, grid=grid)
+            tool_group = ToolGroup(
+                widget=group,
+                grid=grid,
+                select_all_checkbox=select_all_checkbox,
+                toolbox_button=toolbox_button,
+            )
 
             for tool in category_tools:
                 card = ToolCard(tool.name, description=tool.description)
@@ -97,6 +118,11 @@ class ToolsTree(QWidget):
                 if tool.category == "jetbrains":
                     card.set_checkbox_enabled(False)
                     card.setToolTip(self.JETBRAINS_TOOLTIP)
+                card.checked_changed.connect(
+                    lambda _checked, group_category=category: self.update_group_selection_state(
+                        group_category,
+                    )
+                )
                 entry = ToolCardEntry(tool=tool, card=card, group=group)
                 self.tool_items.append(entry)
                 tool_group.entries.append(entry)
@@ -113,6 +139,9 @@ class ToolsTree(QWidget):
                 font-weight: 700;
                 margin-top: 8px;
             }
+            QCheckBox#groupSelectAll {
+                font-size: 12px;
+            }
             """
         )
 
@@ -126,7 +155,64 @@ class ToolsTree(QWidget):
             matches_category = category is None or category == item.tool.category
             item.visible = matches_search and matches_category
 
+        for group_category in self.groups:
+            self.update_group_selection_state(group_category)
         self.schedule_reflow()
+
+    def toggle_group_checked(self, category: str) -> None:
+        candidates = self.group_checkable_items(category)
+        if not candidates:
+            self.update_group_selection_state(category)
+            return
+
+        self.set_group_checked(
+            category,
+            not all(item.card.is_checked() for item in candidates),
+        )
+
+    def set_group_checked(self, category: str, checked: bool) -> None:
+        group = self.groups.get(category)
+        if not group:
+            return
+
+        for item in self.group_checkable_items(category):
+            item.card.set_checked(checked)
+
+        self.update_group_selection_state(category)
+
+    def group_checkable_items(self, category: str) -> list[ToolCardEntry]:
+        group = self.groups.get(category)
+        if not group:
+            return []
+
+        return [
+            item
+            for item in group.entries
+            if item.visible
+            and item.status == PackageStatus.NOT_INSTALLED
+            and not item.installing
+            and not item.uninstalling
+            and item.card.checkbox.isEnabled()
+        ]
+
+    def update_group_selection_state(self, category: str) -> None:
+        group = self.groups.get(category)
+        if not group:
+            return
+
+        candidates = self.group_checkable_items(category)
+        checkbox = group.select_all_checkbox
+        checkbox.blockSignals(True)
+        checkbox.setEnabled(bool(candidates))
+        if not candidates:
+            checkbox.setCheckState(Qt.CheckState.Unchecked)
+        elif all(item.card.is_checked() for item in candidates):
+            checkbox.setCheckState(Qt.CheckState.Checked)
+        elif any(item.card.is_checked() for item in candidates):
+            checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
+        else:
+            checkbox.setCheckState(Qt.CheckState.Unchecked)
+        checkbox.blockSignals(False)
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
@@ -181,6 +267,8 @@ class ToolsTree(QWidget):
             for column in range(columns):
                 group.grid.setColumnStretch(column, 1)
             group.widget.setVisible(bool(visible_entries))
+        for group_category in self.groups:
+            self.update_group_selection_state(group_category)
 
     def package_for_item(self, item: ToolCardEntry) -> str:
         return item.tool.package
@@ -216,6 +304,26 @@ class ToolsTree(QWidget):
 
         if item.tool.category == "jetbrains":
             item.card.setToolTip(self.JETBRAINS_TOOLTIP)
+        self.update_group_selection_state(item.tool.category)
+
+    def set_jetbrains_toolbox_installed(self, installed: bool) -> None:
+        group = self.groups.get("jetbrains")
+        if not group or not group.toolbox_button:
+            return
+
+        try:
+            group.toolbox_button.clicked.disconnect()
+        except RuntimeError:
+            pass
+
+        if installed:
+            group.toolbox_button.setText("Open Toolbox")
+            group.toolbox_button.setToolTip("Open JetBrains Toolbox")
+            group.toolbox_button.clicked.connect(self.toolbox_requested.emit)
+        else:
+            group.toolbox_button.setText("Install Toolbox")
+            group.toolbox_button.setToolTip("Open the JetBrains Toolbox download page")
+            group.toolbox_button.clicked.connect(self.toolbox_install_requested.emit)
 
     def update_service_status(self, item: ToolCardEntry, _service_info: object | None) -> None:
         return
