@@ -8,6 +8,8 @@ from app.gui.main_window import MainWindow
 def main() -> int:
     if "--smoke-test" in sys.argv:
         app = QApplication([arg for arg in sys.argv if arg != "--smoke-test"])
+        window = MainWindow(auto_refresh=False)
+        window.close()
         app.quit()
         print("Fast Tools Qt startup ok")
         return 0

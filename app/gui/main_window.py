@@ -147,7 +147,7 @@ class UpdateWorker(QObject):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self) -> None:
+    def __init__(self, auto_refresh: bool = True) -> None:
         super().__init__()
         self.app_version = get_app_version()
         self.app_channel = get_app_channel()
@@ -191,7 +191,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
         self.loading_mask = LoadingMask(central)
 
-        self.refresh_statuses()
+        if auto_refresh:
+            self.refresh_statuses()
 
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
