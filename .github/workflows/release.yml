@@ -47,6 +47,16 @@ jobs:
       - name: Build release artifacts
         run: TARGET_ARCHES=amd64 RELEASE_CHANNEL=${{ steps.release_meta.outputs.release_channel }} ./scripts/build-release.sh
 
+      - name: Verify release tag version matches package version
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          PACKAGE_VERSION="$(python3 -c 'import json; import sys; print(json.load(open("package.json"))["version"])')"
+          EXPECTED_TAG="v${PACKAGE_VERSION}"
+          if [[ "${TAG_NAME}" != "${EXPECTED_TAG}" ]]; then
+            echo "Release tag ${TAG_NAME} does not match package.json version ${PACKAGE_VERSION}" >&2
+            exit 1
+          fi
+
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
