@@ -144,6 +144,10 @@ On Linux hosts, X11 forwarding usually also requires mounting the X11 socket and
 ## Release and Install via install.sh
 
 Fast Tools supports script-based release, install, update, and uninstall without `.deb`.
+Release channels:
+
+- `stable`: consume only stable GitHub Releases (`prerelease=false`).
+- `beta`: consume prereleases (`beta`, `rc`) and can later move to newer stable.
 
 ### Build release artifacts
 
@@ -173,26 +177,57 @@ dist-release/
 
 ### Publish
 
-Push a version tag and let GitHub Actions build and upload release assets to GitHub Releases.
+Stable release:
+
+```bash
+git tag v1.2.0
+git push origin v1.2.0
+```
+
+Beta / prerelease:
+
+```bash
+git tag v1.2.0-beta.1
+git push origin v1.2.0-beta.1
+```
+
+The release workflow auto-sets:
+
+- tags containing `beta` or `rc` -> `prerelease=true` and beta channel metadata
+- all other tags -> stable release (`prerelease=false`)
 
 ### User install / update / uninstall
 
-Install:
+Install stable (default):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/trungkien65/fast-tools/main/install.sh | bash
 ```
 
-Check version:
+Install beta channel:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/trungkien65/fast-tools/main/install.sh | bash -s -- --beta
+```
+
+Check version and channel:
 
 ```bash
 fast-tools --version
+fast-tools --channel
 ```
 
-Update:
+Update using installed channel:
 
 ```bash
 fast-tools --update
+```
+
+Switch channel:
+
+```bash
+fast-tools --switch-channel beta
+fast-tools --switch-channel stable
 ```
 
 Uninstall:

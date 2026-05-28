@@ -11,6 +11,7 @@ ARM64_BIN="${ARM64_BIN:-${ROOT_DIR}/artifacts/linux-arm64/fast-tools}"
 ICON_PATH="${ICON_PATH:-${ROOT_DIR}/artifacts/common/icon.png}"
 BUILD_CMD="${BUILD_CMD:-}"
 TARGET_ARCHES="${TARGET_ARCHES:-amd64,arm64}"
+RELEASE_CHANNEL="${RELEASE_CHANNEL:-stable}"
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -34,9 +35,11 @@ PY
 make_version_json() {
   local out_file="$1"
   local version="$2"
+  local channel="$3"
   cat > "${out_file}" <<EOF
 {
-  "version": "${version}"
+  "version": "${version}",
+  "channel": "${channel}"
 }
 EOF
 }
@@ -45,6 +48,7 @@ pack_arch() {
   local arch="$1"
   local bin_path="$2"
   local version="$3"
+  local channel="$4"
 
   if [[ ! -f "${bin_path}" ]]; then
     echo "Missing binary for ${arch}: ${bin_path}" >&2
@@ -56,7 +60,7 @@ pack_arch() {
 
   cp -f "${bin_path}" "${stage_dir}/fast-tools"
   chmod +x "${stage_dir}/fast-tools"
-  make_version_json "${stage_dir}/version.json" "${version}"
+  make_version_json "${stage_dir}/version.json" "${version}" "${channel}"
   if [[ -f "${ICON_PATH}" ]]; then
     cp -f "${ICON_PATH}" "${stage_dir}/icon.png"
   fi
@@ -97,24 +101,25 @@ main() {
     eval ${BUILD_CMD}
   fi
 
+  if [[ "${RELEASE_CHANNEL}" != "stable" && "${RELEASE_CHANNEL}" != "beta" ]]; then
+    echo "Invalid RELEASE_CHANNEL: ${RELEASE_CHANNEL}. Use stable or beta." >&2
+    exit 1
+  fi
+
   rm -rf "${DIST_DIR}"
   mkdir -p "${DIST_DIR}"
 
-  cat > "${VERSION_JSON}" <<EOF
-{
-  "version": "${version}"
-}
-EOF
+  make_version_json "${VERSION_JSON}" "${version}" "${RELEASE_CHANNEL}"
 
   cp -f "${ROOT_DIR}/install.sh" "${DIST_DIR}/install.sh"
   cp -f "${ROOT_DIR}/uninstall.sh" "${DIST_DIR}/uninstall.sh"
   chmod +x "${DIST_DIR}/install.sh" "${DIST_DIR}/uninstall.sh"
 
   if [[ "$(arch_enabled "amd64")" == "yes" ]]; then
-    pack_arch "amd64" "${AMD64_BIN}" "${version}"
+    pack_arch "amd64" "${AMD64_BIN}" "${version}" "${RELEASE_CHANNEL}"
   fi
   if [[ "$(arch_enabled "arm64")" == "yes" ]]; then
-    pack_arch "arm64" "${ARM64_BIN}" "${version}"
+    pack_arch "arm64" "${ARM64_BIN}" "${version}" "${RELEASE_CHANNEL}"
   fi
 
   echo "Release artifacts generated at ${DIST_DIR}"

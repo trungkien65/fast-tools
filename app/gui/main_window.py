@@ -25,7 +25,7 @@ from app.gui.component import (
     ToolCardEntry,
     ToolsTree,
 )
-from app.version import APP_NAME, get_app_version
+from app.version import APP_NAME, get_app_channel, get_app_version
 
 
 class InstallWorker(QObject):
@@ -114,7 +114,8 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.app_version = get_app_version()
-        self.setWindowTitle(f"{APP_NAME} v{self.app_version}")
+        self.app_channel = get_app_channel()
+        self.setWindowTitle(f"{APP_NAME} v{self.app_version} ({self.app_channel})")
         self.resize(1040, 640)
 
         self.tools: list[Tool] = load_tools()
@@ -138,7 +139,7 @@ class MainWindow(QMainWindow):
         self.log_panel = LogPanel()
 
         layout = QVBoxLayout()
-        layout.addWidget(QLabel("Developer tools"))
+        layout.addWidget(QLabel(f"{APP_NAME} v{self.app_version} ({self.app_channel})"))
         layout.addWidget(self.filter_bar)
         layout.addWidget(self.tree)
         layout.addWidget(self.action_bar)

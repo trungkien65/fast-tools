@@ -32,13 +32,26 @@ jobs:
           cp dist/fast-tools artifacts/linux-amd64/fast-tools
           if [ -f icon.png ]; then cp icon.png artifacts/common/icon.png; fi
 
+      - name: Resolve release channel
+        id: release_meta
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          if [[ "${TAG_NAME}" == *beta* || "${TAG_NAME}" == *rc* ]]; then
+            echo "prerelease=true" >> "${GITHUB_OUTPUT}"
+            echo "release_channel=beta" >> "${GITHUB_OUTPUT}"
+          else
+            echo "prerelease=false" >> "${GITHUB_OUTPUT}"
+            echo "release_channel=stable" >> "${GITHUB_OUTPUT}"
+          fi
+
       - name: Build release artifacts
-        run: TARGET_ARCHES=amd64 ./scripts/build-release.sh
+        run: TARGET_ARCHES=amd64 RELEASE_CHANNEL=${{ steps.release_meta.outputs.release_channel }} ./scripts/build-release.sh
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           name: Release ${{ github.ref_name }}
+          prerelease: ${{ steps.release_meta.outputs.prerelease }}
           files: |
             dist-release/*.tar.gz
             dist-release/*.tar.gz.sha256
