@@ -267,18 +267,56 @@ tag_name = str(best.get("tag_name", "")).strip()
 if not tag_name:
     raise SystemExit("Release tag is missing from GitHub API response")
 version = tag_name[1:] if tag_name.startswith("v") else tag_name
-asset_name = f"fast-tools-linux-{arch}-v{version}.tar.gz"
-checksum_name = f"{asset_name}.sha256"
+expected_asset_name = f"fast-tools-linux-{arch}-v{version}.tar.gz"
+expected_checksum_name = f"{expected_asset_name}.sha256"
 archive_url = ""
 checksum_url = ""
+actual_asset_name = ""
+
+
+def parse_asset_version(name: str):
+    m = re.match(rf"^fast-tools-linux-{re.escape(arch)}-v(.+?)\.tar\.gz$", name)
+    if not m:
+        return None
+    return parse_version(m.group(1))
+
+fallback_assets = []
 for asset in best.get("assets", []):
     name = str(asset.get("name", ""))
-    if name == asset_name:
+    if name == expected_asset_name:
         archive_url = str(asset.get("browser_download_url", ""))
-    elif name == checksum_name:
-        checksum_url = str(asset.get("browser_download_url", ""))
+        actual_asset_name = name
+        break
+    parsed_version = parse_asset_version(name)
+    if parsed_version is not None:
+        fallback_assets.append((parsed_version, name, str(asset.get("browser_download_url", ""))))
+
+if not archive_url and fallback_assets:
+    fallback_assets.sort(key=lambda item: item[0])
+    actual_asset_name = fallback_assets[-1][1]
+    archive_url = fallback_assets[-1][2]
+    checksum_name = f"{actual_asset_name}.sha256"
+    print(f"Warning: using fallback archive asset {actual_asset_name} for release {tag_name}", file=sys.stderr)
+else:
+    checksum_name = expected_checksum_name
+
 if not archive_url:
-    raise SystemExit(f"Release asset not found: {asset_name}")
+    raise SystemExit(f"Release asset not found: {expected_asset_name}")
+
+for asset in best.get("assets", []):
+    name = str(asset.get("name", ""))
+    if name == checksum_name:
+        checksum_url = str(asset.get("browser_download_url", ""))
+        break
+
+if not checksum_url and actual_asset_name:
+    checksum_name = f"{actual_asset_name}.sha256"
+    for asset in best.get("assets", []):
+        name = str(asset.get("name", ""))
+        if name == checksum_name:
+            checksum_url = str(asset.get("browser_download_url", ""))
+            break
+
 if not checksum_url:
     raise SystemExit(f"Checksum asset not found: {checksum_name}")
 
@@ -595,7 +633,14 @@ main() {
     extract_mode="beta_prerelease_only"
   fi
 
-  mapfile -t META < <(extract_release_metadata "${extract_mode}")
+  if ! mapfile -t META < <(extract_release_metadata "${extract_mode}"); then
+    err "Failed to extract release metadata."
+    exit 1
+  fi
+  if [[ ${#META[@]} -lt 5 ]]; then
+    err "Release metadata is incomplete."
+    exit 1
+  fi
   LATEST_VERSION="${META[0]}"
   ARCHIVE_URL="${META[1]}"
   CHECKSUM_URL="${META[2]}"
