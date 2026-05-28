@@ -103,6 +103,17 @@ def test_check_package_returns_structured_result():
     assert result.status == PackageStatus.INSTALLED
 
 
+def test_check_package_treats_available_command_as_installed(monkeypatch):
+    monkeypatch.setattr(PackageChecker, "command_exists", staticmethod(lambda command: command == "pnpm"))
+
+    result = FakeChecker().check_package("pnpm", "pnpm")
+
+    assert result.installed is True
+    assert result.exists is True
+    assert result.command_available is True
+    assert result.status == PackageStatus.INSTALLED
+
+
 def test_package_name_validation_rejects_shell_strings():
     with pytest.raises(ValueError):
         PackageChecker._validate_package_name("git; rm -rf /")

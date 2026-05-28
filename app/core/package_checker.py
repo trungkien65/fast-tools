@@ -59,9 +59,10 @@ class PackageChecker:
                 status=PackageStatus.INSTALLED if installed else PackageStatus.PACKAGE_NOT_FOUND,
             )
 
-        installed, version = self.installed_version(package_name)
-        exists = True if installed else self.package_exists(package_name)
         command_available = self.command_exists(command_name) if command_name else None
+        installed, version = self.installed_version(package_name)
+        installed = installed or bool(command_available)
+        exists = True if installed else self.package_exists(package_name)
 
         if installed:
             status = PackageStatus.INSTALLED
