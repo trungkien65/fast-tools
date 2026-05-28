@@ -53,7 +53,6 @@ pack_arch() {
 
   local stage_dir
   stage_dir="$(mktemp -d)"
-  trap 'rm -rf "${stage_dir}"' RETURN
 
   cp -f "${bin_path}" "${stage_dir}/fast-tools"
   chmod +x "${stage_dir}/fast-tools"
@@ -66,6 +65,7 @@ pack_arch() {
   local out="${DIST_DIR}/${name}"
   tar -czf "${out}" -C "${stage_dir}" .
   sha256sum "${out}" | awk '{print $1}' > "${out}.sha256"
+  rm -rf "${stage_dir}"
 }
 
 arch_enabled() {
