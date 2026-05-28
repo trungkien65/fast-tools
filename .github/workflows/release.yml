@@ -15,16 +15,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          node-version: "20"
-          cache: "npm"
-        if: ${{ hashFiles('package.json') != '' }}
-
-      - name: Install Node dependencies
-        run: npm ci
-        if: ${{ hashFiles('package-lock.json') != '' }}
+          python-version: "3.11"
 
       - name: Build release artifacts
         run: ./scripts/build-release.sh
