@@ -151,7 +151,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.app_version = get_app_version()
         self.app_channel = get_app_channel()
-        self.setWindowTitle(f"{APP_NAME} v{self.app_version} ({self.app_channel})")
+        self.setWindowTitle(APP_NAME)
         self.resize(1040, 640)
 
         self.tools: list[Tool] = load_tools()
@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
         self.footer_bar.update_requested.connect(self.update_application)
 
         layout = QVBoxLayout()
-        layout.addWidget(QLabel(f"{APP_NAME} v{self.app_version} ({self.app_channel})"))
+        layout.addWidget(QLabel(APP_NAME))
         layout.addWidget(self.filter_bar)
         layout.addWidget(self.tree)
         layout.addWidget(self.action_bar)
